@@ -1,0 +1,18 @@
+@font-face {
+  font-family: 'HelveticaNeueCyr';
+  src: url('/fonts/helvetica-neue/HelveticaNeueCyr-Roman.eot');
+  src: local('/fonts/helvetica-neue/HelveticaNeueCyr-Roman'), url('/fonts/helvetica-neue/HelveticaNeueCyr-Roman.eot?#iefix') format('embedded-opentype'), url('/fonts/helvetica-neue/HelveticaNeueCyr-Roman.woff') format('woff'), url('/fonts/helvetica-neue/HelveticaNeueCyr-Roman.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+.hello-god {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'HelveticaNeueCyr';
+}
+.hello-god h1 {
+  margin: 0;
+  font-size: 42px;
+}
