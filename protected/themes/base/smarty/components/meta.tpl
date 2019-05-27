@@ -19,6 +19,8 @@
 	<!-- CSS -->
 	<link type="text/css" rel="stylesheet" href="/css/normalize.css" >
 	<link type="text/css" rel="stylesheet" href="/css/style.css" >
+	
+	<link rel="stylesheet" href="/front-end/build/static/css/2.94155858.chunk.css">
 </head>
 <body class="page-{$_page.system}">
 {/strip}

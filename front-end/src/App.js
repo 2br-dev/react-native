@@ -1,7 +1,8 @@
 import React from 'react';
 import Container from '@material-ui/core/Container';
-import Menu from './Menu';
-import Form from './Form';
+import Menu from './components/Menu';
+import Form from './components/Form';
+import { SnackbarProvider } from 'notistack';
 
 class App extends React.Component {
   constructor(props) {
@@ -19,13 +20,15 @@ class App extends React.Component {
 
   render() {
     return (
-      <Container maxWidth="sm">
-        <Menu
-          signIn={() => this.handleClick('signIn')}
-          signUp={() => this.handleClick('signUp')}
-        />
-        <Form type={this.state.page}/>
-      </Container>
+      <SnackbarProvider maxSnack={3}>
+        <Container maxWidth="sm">
+          <Menu
+            signIn={() => this.handleClick('signIn')}
+            signUp={() => this.handleClick('signUp')}
+          />
+          <Form type={this.state.page}/>
+        </Container>
+      </SnackbarProvider>
     );
   }
 }
