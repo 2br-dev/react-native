@@ -1,23 +1,55 @@
 import React from 'react';
-import Toolbar from '@material-ui/core/Toolbar';
-import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
+import Link from '@material-ui/core/Link';
+import { MemoryRouter as Router } from 'react-router';
+import { Link as RouterLink } from 'react-router-dom';
+import clsx from 'clsx';
 
 const useStyles = makeStyles(theme => ({
-  toolbar: {
-    display: 'flex',
-    justifyContent: 'space-around',
-  },
+    authMenu: {
+        display: 'flex',
+        justifyContent: 'space-around',
+        width: '100%',
+    },
+    link: {
+        width: '50%',
+        height: '64px',
+        lineHeight: '64px',
+        textAlign: 'center',
+    },
+    Active: {
+        backgroundColor: '#f9f9f9',
+        cursor: 'default',
+    },
 }));
 
 function Menu(props) {
-  const classes = useStyles();
-  return (
-    <Toolbar className={classes.toolbar}>
-      <Button onClick={props.signIn}>Вход</Button>
-      <Button onClick={props.signUp}>Регистрация</Button>
-    </Toolbar>
-  );
+    const classes = useStyles();
+    
+    return (
+        <Router>
+            <div className={classes.authMenu}>
+                <Link
+                    component={RouterLink}
+                    to="/"
+                    onClick={props.signIn}
+                    className={clsx(classes.link, props.active === 'signIn' ? classes.Active : '')}
+                    underline='none'
+                >
+                    Вход
+                </Link>
+                <Link
+                    component={RouterLink}
+                    to="/"
+                    onClick={props.signUp}
+                    className={clsx(classes.link, props.active === 'signUp' ? classes.Active : '')}
+                    underline='none'
+                >
+                    Регистрация
+                </Link>
+            </div>
+        </Router>
+    );
 }
 
 export default Menu;

@@ -1,75 +1,71 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
-import Input from '@material-ui/core/Input';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Link from '@material-ui/core/Link';
-import styled from 'styled-components';
+import TextField from '@material-ui/core/TextField';
+import Form from './StyledForm';
+import SubmitContainer from './SubmitContainer';
 
-class LoginForm extends React.Component
+function LoginForm()
 {
-  constructor(props)
-  {
-    super(props);
-    this.state = {
-      username: '',
-      password: '',
-      showPassword: false,
+    const [formData, setFormData] = useState({
+        login: '',
+        password: '',
+        showPassword: false,
+    });
+
+     const handleChange = prop => event => {
+        setFormData({ ...formData, [prop]: event.target.value});
     };
-  }
 
-  handleChange = prop => event => {
-    this.setState({
-      [prop]: event.target.value,
-    });
-  };
-
-  handleClickShowPassword = () => {
-    this.setState({
-      showPassword: !this.state.showPassword,
-    });
-  };
-  
-  render()
-  {
-    const SubmitArea = styled.div`
-      display: flex;
-      justify-content: space-between;
-    `;
+    const handleClickShowPassword = () => {
+        setFormData({ ...formData, showPassword: !formData.showPassword});
+    };
     
     return (
-      <form style={{ padding: "20px" }}>
-        <Input
-          fullWidth
-          style={{ marginBottom: "30px" }}
-          value={this.state.username}
-          onChange={this.handleChange('username')}
-          placeholder="Имя пользователя"
-        />
-        <Input
-          fullWidth
-          type={this.state.showPassword ? 'text' : 'password'}
-          style={{ marginBottom: "30px" }}
-          value={this.state.password}
-          onChange={this.handleChange('password')}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton aria-label="Toggle password visibility" onClick={this.handleClickShowPassword}>
-                {this.state.showPassword ? <Visibility /> : <VisibilityOff />}
-              </IconButton>
-            </InputAdornment>
-          }
-          placeholder="Пароль"
-        />
-        <SubmitArea>
-          <Button variant="contained" color="primary">Войти</Button>
-          <Link component="button" to="/">Забыли пароль?</Link>
-        </SubmitArea>
-      </form>
+        <Form>
+            <TextField
+                fullWidth
+                label="Email или логин"
+                type="email"
+                autoComplete="email"
+                value={formData.login}
+                onChange={handleChange('login')}
+                margin="dense"
+                variant="outlined"
+            />
+            <TextField
+                fullWidth
+                label="Пароль"
+                type={formData.showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={formData.password}
+                margin="dense"
+                variant="outlined"
+                onChange={handleChange('password')}
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton
+                                edge="end"
+                                aria-label="Toggle password visibility"
+                                onClick={handleClickShowPassword}
+                            >
+                                {formData.showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    ),
+                }}
+            />
+            <SubmitContainer>
+                <Button variant="contained" color="primary">Войти</Button>
+                <Link component="button" to="/">Забыли пароль?</Link>
+            </SubmitContainer>
+        </Form>
     );
-  }
 }
 
 export default LoginForm;
