@@ -36,6 +36,15 @@ class User
     {
         $dbConnect = new DbConnect('db_mdd_users');
 
+        if (!$storedEmail = $dbConnect->query("SELECT * FROM db_mdd_users WHERE email='{$this->email}'")) {
+            echo "Ошибка запроса createUser к БД. Пожалуйста, сообщите об этой ошибке администрации сайта.";
+            exit();
+        }
+
+        if ($storedEmail->num_rows > 0) {
+            return "Дубликат";
+        }
+
         $fieldNames = '';
         $values = '';
         foreach ($this as $key => $value) {
@@ -49,7 +58,7 @@ class User
 
         $dbConnect->close();
 
-        return true;
+        return "Успешная регистрация";
     }
 
     public function loadUserData(string $email)

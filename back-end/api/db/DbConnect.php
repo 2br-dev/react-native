@@ -56,7 +56,7 @@ class DbConnect
 
     public function query(string $query)
     {
-        $this->mysql->query($query);
+        return $this->mysql->query($query);
     }
 
     public function close()

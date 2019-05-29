@@ -8,8 +8,4 @@ $cryptedPass = password_hash($password, PASSWORD_BCRYPT);
 
 $user = new User($email, $cryptedPass);
 
-if ($user->createUser()) {
-    echo "Успешная регистрация";
-} else {
-    echo "Во время регистрации возникли технические трудности. Попробуйте зарегистрироваться позже или обратитесь к администрации сайта.";
-}
+echo $user->createUser();
