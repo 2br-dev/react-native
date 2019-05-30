@@ -8,4 +8,7 @@ $cryptedPass = password_hash($password, PASSWORD_BCRYPT);
 
 $user = new User($email, $cryptedPass);
 
+$user->setEmail($email);
+$user->setPassword($cryptedPass);
+
 echo $user->createUser();

@@ -83,7 +83,6 @@ function Registration(props)
     return (
         <Form>
             <Input
-                id="email"
                 label="Email"
                 type="email"
                 name="email"
@@ -95,7 +94,6 @@ function Registration(props)
             />
                  
             <Input
-                id="pass"
                 label="Пароль"
                 type='password'
                 name="password"
@@ -107,7 +105,6 @@ function Registration(props)
             />
             
             <Input
-                id="conf"
                 label="Повторите пароль"
                 type='password'
                 name="confirm"

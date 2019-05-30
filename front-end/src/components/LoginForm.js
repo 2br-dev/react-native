@@ -8,8 +8,10 @@ import Link from '@material-ui/core/Link';
 import TextField from '@material-ui/core/TextField';
 import Form from './StyledForm';
 import SubmitContainer from './SubmitContainer';
+//import $ from 'jquery';
+import { withSnackbar } from 'notistack';
 
-function LoginForm()
+function LoginForm(props)
 {
     const [formData, setFormData] = useState({
         login: '',
@@ -24,6 +26,26 @@ function LoginForm()
     const handleClickShowPassword = () => {
         setFormData({ ...formData, showPassword: !formData.showPassword});
     };
+
+    /*const handleClick = () => {
+        const { login, password } = formData;
+        
+        $.ajax({
+            type: "POST",
+            url: "/back-end/api/AuthController.php",
+            data: "login="+login+"&password="+password,
+            success: function (responseMsg) {
+                if (responseMsg === 'Отказ') {
+                    props.enqueueSnackbar('Неверный логин или пароль', { variant: 'error'});
+                }
+                // отправлять на страницу Profile
+            },
+            error: function (xhr, status) {
+                props.enqueueSnackbar('Ошибка авторизации. Пожалуйста, сообщите об этом администрации сайта.', { variant: 'error', autoHideDuration: 8000});
+                props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
+            }
+        });
+    };*/
     
     return (
         <Form>
@@ -61,11 +83,19 @@ function LoginForm()
                 }}
             />
             <SubmitContainer>
-                <Button variant="contained" color="primary">Войти</Button>
-                <Link component="button" to="/">Забыли пароль?</Link>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                        props.onClick(formData.login, formData.password);
+                    }}
+                >
+                    Войти
+                </Button>
+                <Link component="button" to="/forgot">Забыли пароль?</Link>
             </SubmitContainer>
         </Form>
     );
 }
 
-export default LoginForm;
+export default withSnackbar(LoginForm);

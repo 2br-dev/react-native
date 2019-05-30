@@ -1,11 +1,11 @@
 <?php
-/* Smarty version 3.1.32, created on 2019-05-29 18:22:42
+/* Smarty version 3.1.32, created on 2019-05-30 20:52:23
   from 'C:\OpenServer\domains\react-native.local\protected\themes\base\smarty\core\404.tpl' */
 
 /* @var Smarty_Internal_Template $_smarty_tpl */
 if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
   'version' => '3.1.32',
-  'unifunc' => 'content_5ceea3c2af6b93_33850909',
+  'unifunc' => 'content_5cf01857d05b22_29347519',
   'has_nocache_code' => false,
   'file_dependency' => 
   array (
@@ -21,7 +21,7 @@ if ($_smarty_tpl->_decodeProperties($_smarty_tpl, array (
     'file:../system/sitemap.tpl' => 1,
   ),
 ),false)) {
-function content_5ceea3c2af6b93_33850909 (Smarty_Internal_Template $_smarty_tpl) {
+function content_5cf01857d05b22_29347519 (Smarty_Internal_Template $_smarty_tpl) {
 $_smarty_tpl->_checkPlugins(array(0=>array('file'=>'C:\\OpenServer\\domains\\react-native.local\\protected\\app\\libs\\smarty.plugins\\function.compress.php','function'=>'smarty_function_compress',),));
 ?><!DOCTYPE html>
 <!-- (c) lnk. celebro | http://www.celebro.ru/ -->

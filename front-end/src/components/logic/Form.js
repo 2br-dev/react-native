@@ -1,11 +1,11 @@
 import React from 'react';
-import LoginForm from '../LoginForm';
+import Login from '../Login';
 import Registration from '../Registration';
 
 function Form(props)
 {
     if (props.type === 'signIn') {
-        return (<LoginForm />);
+        return (<Login />);
     } else if (props.type === 'signUp') {
         return (<Registration />);
     } else {

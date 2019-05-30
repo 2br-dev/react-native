@@ -12,10 +12,11 @@ class User
     private $city;
     private $created;
     private $updated;
+    private $login = '';
 
     function __construct(
-      string $email,
-      string $password,
+      string $email = '',
+      string $password = '',
       string $name = '',
       string $phone = '',
       string $address = '',
@@ -30,7 +31,107 @@ class User
         $this->city = $city;
         $this->created = date('Y-m-d H:i:s');
         $this->updated = $this->created;
+        $dbConnect = new DbConnect('db_mdd_users');
+        $existedCol = $dbConnect->query("DESCRIBE db_mdd_users");
+        $columns = [];
+        for ($i = 0; $i < $existedCol->num_rows; $i++) {
+            $row = $existedCol->fetch_assoc();
+            $columns[] = $row['Field'];
+        }
+        foreach ($this as $key => $value) {
+            if (!in_array($key, $columns)) {
+                $dbConnect->query("ALTER TABLE db_mdd_users ADD $key VARCHAR(255)");
+            }
+        }
     }
+
+    // Сеттеры  -----------------------------------------
+
+    public function setEmail(string $email)
+    {
+        $this->email = $email;
+    }
+
+    public function setPassword(string $password)
+    {
+        $this->password = $password;
+    }
+
+    public function setName(string $name)
+    {
+        $this->name = $name;
+    }
+
+    public function setPhone(string $phone)
+    {
+        $this->phone = $phone;
+    }
+
+    public function setAddress(string $address)
+    {
+        $this->address = $address;
+    }
+
+    public function setCity(string $city)
+    {
+        $this->city = $city;
+    }
+
+    public function setUpdated(string $date)
+    {
+        $this->updated = $date;
+    }
+
+    public function setLogin(string $login)
+    {
+        $this->login = $login;
+    }
+
+    //---------------------------------------------------
+
+    // Геттеры  -----------------------------------------
+
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function getPhone()
+    {
+        return $this->phone;
+    }
+
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
+    public function getLogin()
+    {
+        return $this->login;
+    }
+
+    //---------------------------------------------------
 
     public function createUser()
     {
@@ -61,12 +162,12 @@ class User
         return "Успешная регистрация";
     }
 
-    public function loadUserData(string $email)
+    public function loadUserData(int $id)
     {
         $dbConnect = new DbConnect('db_mdd_users');
 
-        $column = "email='".$email."'";
-        $userData = $dbConnect->load($column);
+        $column = "id='".$id."'";
+        $userData = $dbConnect->load($column)->fetch_assoc();
 
         foreach ($userData as $key => $value) {
             $this->$key = $value;
@@ -109,5 +210,16 @@ class User
             $this->$key = '';
           }
         }
+    }
+
+    public function exportXML()
+    {
+        $xml = new SimpleXMLElement("<?xml version='1.0' standalone='yes' ?><user></user>");
+        foreach ($this as $key => $value) {
+            $xml->addChild($key, $value);
+        }
+        $xmlString = $xml->asXML();
+
+        return $xmlString;
     }
 }
