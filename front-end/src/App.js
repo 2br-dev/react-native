@@ -12,6 +12,7 @@ function App(props)
     const [loggedIn, setLoggedIn] = useState(false);
 
     $.ajax({
+        // проверка авторизации
         type: "POST",
         url: "/back-end/api/AuthController.php",
         data: "signedIn=q",
@@ -29,8 +30,7 @@ function App(props)
             }
         },
         error: function (xhr, status) {
-            props.enqueueSnackbar('Ошибка авторизации. Пожалуйста, сообщите об этом администрации сайта.', { variant: 'error', autoHideDuration: 8000});
-            props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
+            console.log('Ошибка отправки запроса на сервер. Проверьте ваше интернет соединение.');
         },
     });
 

@@ -4,6 +4,7 @@ import Input from './Input';
 import $ from 'jquery';
 import { Redirect } from 'react-router';
 import { withSnackbar } from 'notistack';
+import { deleteCookie } from './logic/CookieManager';
 
 /*const useStyles = makeStyles(theme => ({
     profileContainer: {
@@ -19,35 +20,38 @@ function Profile(props)
     const [loggedIn, setLoggedIn] = useState(false);
 
     $.ajax({
+        // проверка авторизации
         type: "POST",
         url: "/back-end/api/AuthController.php",
         data: "signedIn=q",
         async: false,
         success: function (response) {
-            const userId = response;
-            console.log('Запрос!');
-            console.log('userId', userId);
-            if (response !== 'guest') {
+            console.log('Проверка авторизации в Profile');
+            console.log('Ответ сервера = ', response);
+            if (response === 'user') {
                 if (!loggedIn) {
-                    console.log('Меняю loggedIn');
+                    console.log('Устанавливаю loggedIn в true');
                     setLoggedIn(true);
                 }
-                console.log('profileData', profileData);
+                console.log('profileData = ', profileData);
+                //console.log('Ответ от сервера = ', response);
                 if (profileData.length === 0) {
-                    console.log('Вошёл в иф');
+                    console.log('profileData.length == 0');
                     $.ajax({
+                        // получение данных
                         type: "POST",
                         url: "/back-end/api/UserProfile.php",
-                        data: "id="+userId,
                         async: false,
                         success: function (response) {
-                            if (response === 'Неизвестный запрос') {
-                                console.log('Запрос к серверу должен содержать обязательное поле');
+                            console.log('Запрос на получение данных в Profile');
+                            if (response === 'guest') {
+                                console.log('Невалидный токен'); // только для dev версии, убрать перед билдом
+                                setLoggedIn(false);
                                 return;
                             }
                             if (response === '') console.log('Пустой ответ сервера');
-                            console.log('response', response);
-                            console.log('profileData', profileData);
+                            console.log('response = ', response);
+                            console.log('profileData = ', profileData);
                             const parser = new DOMParser();
                             const xml = parser.parseFromString(response, "text/xml");
                             console.log('xml = ', xml);
@@ -67,8 +71,8 @@ function Profile(props)
                         },
                     });
                 }
-            } else if (loggedIn) {
-                    setLoggedIn(false);
+            } else if (response === 'guest' && loggedIn) {
+                setLoggedIn(false);
             }
         },
         error: function (xhr, status) {
@@ -120,6 +124,11 @@ function Profile(props)
                 value={profileData['city']}
                 error={false}
             />
+            <button onClick={() => {
+                console.log('Exit Button');
+                setLoggedIn(false);
+                deleteCookie('token');
+            }}>Выйти</button>
         </div>
         :
         <Redirect to="/login" />

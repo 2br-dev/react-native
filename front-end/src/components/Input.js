@@ -7,6 +7,7 @@ import TextField from '@material-ui/core/TextField';
 
 function Input(props)
 {
+    // кастомизируемое поле ввода
     const [showPassword, setShowPass] = useState(false);
 
     const handleClickShowPassword = () => {

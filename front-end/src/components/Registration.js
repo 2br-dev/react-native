@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
 import $ from 'jquery';
 import { withSnackbar } from 'notistack';
-import Form from './StyledForm';
-import SubmitContainer from './SubmitContainer';
+import Form from './styles/StyledForm';
+import SubmitContainer from './styles/SubmitContainer';
 import { validateEmail, validatePass, confirmPass } from './logic/Validate';
 import Input from './Input';
 
@@ -54,6 +54,7 @@ function Registration(props)
         const password = formData.password;
       
         $.ajax({
+            // регистрация пользователя
             type: "POST",
             url: "/back-end/api/RegistrationController.php",
             data: "email="+email+"&password="+password,

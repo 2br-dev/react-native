@@ -7,16 +7,15 @@ import { withSnackbar } from 'notistack';
 
 function AuthRouter(props)
 {
-    const [page, setPage] = useState('signIn');
-    const [loggedIn, setLoggedIn] = useState(false);
+    const [page, setPage] = useState('signIn'); // какую форму отображать, Вход/Регистрация - signIn/signUp
+    const [loggedIn, setLoggedIn] = useState(false); // авторизован ли пользователь
 
     function handleClick(state) {
         setPage(state);
     }
 
-
-
     $.ajax({
+        // проверка авторизации
         type: "POST",
         url: "/back-end/api/AuthController.php",
         data: "signedIn=q",
