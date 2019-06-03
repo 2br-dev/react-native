@@ -177,6 +177,7 @@ class User
     }
 
     public function updateUser(array $updating)
+    // updating - ассоциативный массив, где ключ - поле в БД
     {
         $dbConnect = new DbConnect('db_mdd_users');
 

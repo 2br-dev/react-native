@@ -24,6 +24,7 @@ function Input(props)
             autoComplete={props.autoComplete}
             value={props.value}
             onChange={props.onChange}
+            onBlur={props.onBlur}
             margin="dense"
             variant="outlined"
             helperText={props.error && props.helperMsg ? props.helperMsg : ''}

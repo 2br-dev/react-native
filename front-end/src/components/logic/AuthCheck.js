@@ -6,6 +6,7 @@ function AuthCheck()
     //localStorage.clear();
     const accessToken = localStorage.getItem('accessToken');
     console.log('AuthCheck -> localStorage -> accessToken = '+accessToken);
+    let result = false;
     if (accessToken) {
         $.ajax({
             type: "POST",
@@ -13,10 +14,12 @@ function AuthCheck()
             data: "signedIn=q&accessToken="+accessToken,
             async: false,
             success: function (response) {
-                console.log('User status App = '+response);
+                console.log('User status AuthCheck = '+response);
                 switch (response) {
                     case 'guest':
-                        return false;
+                        console.log('guest logged');
+                        result = false;
+                        break;
                     
                     case 'token expired':
                         console.log('Просроченый токен доступа. Запрос нового токена.');
@@ -29,24 +32,28 @@ function AuthCheck()
                             success: function (response) {
                                 console.log('User status after send refreshToken = '+response);
                                 if (response === 'guest') {
-                                    return false;
+                                    result = false;
                                 } else {
                                     const tokenArr = response.split(" && ");
                                     localStorage.setItem('accessToken', tokenArr[0]);
                                     localStorage.setItem('refreshToken', tokenArr[1]);
                                     console.log('Access Token = '+localStorage.getItem('accessToken'));
                                     console.log('Refresh Token = '+localStorage.getItem('refreshToken'));
-                                    return true;
+                                    result = true;
                                 }
                             }
                         });
                         break;
                 
                     case 'token is valid':
-                        return true;
+                        console.log('valid token logged');
+                        result = true;
+                        break;
 
                     default:
-                        return false;
+                        console.log('default logged');
+                        result = false;
+                        break;
                 }
             },
             error: function (xhr, status) {
@@ -55,8 +62,12 @@ function AuthCheck()
             },
         });
     } else {
-        return false;
+        console.log('without token logged');
+        result = false;
     }
+
+    console.log('AuthCheck return');
+    return result;
 }
 
 export {AuthCheck};

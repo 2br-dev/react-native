@@ -11,9 +11,11 @@ function App(props)
 {
     const [loggedIn, setLoggedIn] = useState(false);
 
-    if (AuthCheck()) {
-        console.log('App -> Пользователь авторизован, установил loggedIn в true.');
-        setLoggedIn(true);
+    if (!loggedIn) {
+        if (AuthCheck()) {
+            console.log('App -> Пользователь авторизован, установил loggedIn в true.');
+            setLoggedIn(true);
+        }
     }
 
     return (

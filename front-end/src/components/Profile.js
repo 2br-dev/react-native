@@ -19,38 +19,105 @@ function Profile(props)
 {
     //const classes = useStyles();
     const [loggedIn, setLoggedIn] = useState(props.location.state.loggedIn);
-    const [profileData, setProfileData] = useState([]);
+    const [profileData, setProfileData] = useState({});
     const [formData, setFormData] = useState({
         password: '',
         confirm: '',
+        validEmail: true,
         validPassword: true,
         passConfirmed: true,
     });
 
+    console.log('initial profileData = ',profileData);
+
+    const handleBlur = event => {
+        console.log('blur '+event.target.name);
+        console.log('value = '+event.target.value);
+        console.log('profileData on blur = ',profileData);
+        const name = event.target.name;
+        const value = event.target.value;
+        $.ajax({
+            type: "POST",
+            url: "/back-end/api/UpdateController.php",
+            data: "accessToken="+localStorage.getItem('accessToken')+"="+name+"="+value,
+            success: function(response) {
+                console.log('success request');
+                console.log('Ответ сервера: '+response);
+            }
+        });
+        console.log('end blur');
+    }
+
     const handleChange = event => {
+        const value = event.target.value;
         switch (event.target.name) {
+            case 'name':
+                console.log('profileData in handleChange = ',profileData);
+                console.log('name value = ',value);
+                setProfileData({ ...profileData, name: value});
+                break;
+
+            case 'login':
+                console.log('profileData in handleChange = ',profileData);
+                console.log('login value = ',value);
+                setProfileData({ ...profileData, login: value});
+                break;
+            
             case 'email':
+                console.log('profileData in handleChange = ',profileData);
+                console.log('email value = ',value);
+                setProfileData({ ...profileData, email: value});
                 setFormData({
                     ...formData,
-                    email: event.target.value,
-                    validEmail: validateEmail(event.target.value),
+                    validEmail: validateEmail(value),
                 });
+                break;
+
+            case 'phone':
+                console.log('profileData in handleChange = ',profileData);
+                console.log('phone value = ',value);
+                setProfileData({ ...profileData, phone: value});
+                break;
+
+            case 'address':
+                console.log('profileData in handleChange = ',profileData);
+                console.log('address value = ',value);
+                setProfileData({ ...profileData, address: value});
+                break;
+
+            case 'city':
+                console.log('profileData in handleChange = ',profileData);
+                console.log('city value = ',value);
+                setProfileData({ ...profileData, city: value});
                 break;
             
             case 'password':
                 setFormData({
                     ...formData,
-                    password: event.target.value,
-                    validPassword: validatePass(event.target.value),
+                    password: value,
+                    validPassword: validatePass(value),
                 });
                 break;
 
             case 'confirm':
                 setFormData({
                     ...formData,
-                    confirm: event.target.value,
-                    passConfirmed: confirmPass(formData.password, event.target.value),
+                    confirm: value,
+                    passConfirmed: confirmPass(formData.password, value),
                 });
+                if (formData.validPassword && confirmPass(formData.password, value)) {
+                    handleBlur(event);
+                    console.log('formData.password = '+formData.password);
+                    console.log('confirm password value = '+value);
+                    setFormData({
+                        ...formData,
+                        password: '',
+                        confirm: '',
+                        validPassword: true,
+                        passConfirmed: true,
+                    });
+                    props.enqueueSnackbar('Пароль изменён', { variant: 'success' });
+                }
                 break;
 
             default:
@@ -59,8 +126,12 @@ function Profile(props)
     };
 
     if (loggedIn) {
-        console.log('profileData = ', profileData);
-        if (profileData.length === 0) {
+        console.log('profileData in if statement = ', profileData);
+        let keyCount = 0;
+        for (let key in profileData) {
+            keyCount++;
+        }
+        if (keyCount === 0) {
             console.log('profileData.length == 0');
             $.ajax({
                 // получение данных
@@ -83,7 +154,7 @@ function Profile(props)
                     console.log('xml = ', xml);
                     const xmlCollection = xml.childNodes[0].childNodes; // первый тег user, он содержит в себе все нужные теги
                     console.log('xmlCollection', xmlCollection);
-                    const arrayFromXML = [];
+                    const arrayFromXML = {};
                     for (let i = 0; i < xmlCollection.length; i++) {
                         arrayFromXML[xmlCollection[i].tagName] = xmlCollection[i].innerHTML;
                     }
@@ -102,47 +173,59 @@ function Profile(props)
 
     return (
         console.log('Profile -> return: loggedIn = '+loggedIn),
+        console.log('profileData return = ',profileData),
+        console.log('formData return = ',formData),
         loggedIn ? <div>
             <Input
                 label="Имя"
                 type="text"
                 name="name"
                 value={profileData['name']}
+                onChange={handleChange}
+                onBlur={handleBlur}
             />
             <Input
                 label="Логин"
                 type="text"
                 name="login"
-                value={profileData['login']}  
+                value={profileData['login']}
+                onChange={handleChange}
+                onBlur={handleBlur}
             />
             <Input
                 label="Email"
-                type="text"
+                type="email"
                 name="email"
                 autoComplete="email"
                 value={profileData['email']}
-                error={false}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={formData.validEmail ? false : true}
+                helperMsg={formData.validEmail ? '' : 'Введите корректный Email'}
             />
             <Input
                 label="Телефон"
                 type="text"
                 name="phone"
                 value={profileData['phone']}
-                error={false}
+                onChange={handleChange}
+                onBlur={handleBlur}
             />
             <Input
                 label="Адрес"
                 type="text"
                 name="address"
                 value={profileData['address']}
-                error={false}
+                onChange={handleChange}
+                onBlur={handleBlur}
             />
             <Input
                 label="Город"
                 type="text"
                 name="city"
                 value={profileData['city']}
-                error={false}
+                onChange={handleChange}
+                onBlur={handleBlur}
             />
             <Input
                 label="Новый пароль"
@@ -158,8 +241,9 @@ function Profile(props)
                 type="password"
                 name="confirm"
                 value={formData.confirm}
+                onChange={handleChange}
                 error={formData.passConfirmed ? false : true}
-                helperMsg={formData.validPassword || formData.password === '' ? '' : 'Пароль должен быть не менее 8 символов'}
+                helperMsg={formData.passConfirmed || formData.password === '' ? '' : 'Пароли должны совпадать'}
             />
             <SubmitContainer>
                 <Button
