@@ -56,8 +56,8 @@ function returnXmlData($userId)
     echo $xmlString;
 }
 
-if (isset($_COOKIE['accessToken'])) {
-    $accessToken = (new Parser())->parse((string) $_COOKIE['accessToken']);
+if (isset($_POST['accessToken'])) {
+    $accessToken = (new Parser())->parse((string) $_POST['accessToken']);
     //echo "tokenVerify = ".$token->verify($signer, $accessKey);
     if ($accessToken->verify($signer, $accessKey)) {
         $data = new ValidationData(); // It will use the current time to validate (iat, nbf and exp)
@@ -66,8 +66,8 @@ if (isset($_COOKIE['accessToken'])) {
             // время жизни не истекло
             returnXmlData($accessToken->getClaim('uid'));
 
-        } else if (isset($_COOKIE['refreshToken'])) {
-            $refreshToken = (new Parser())->parse((string) $_COOKIE['refreshToken']);
+        }/*  else if (isset($_POST['refreshToken'])) {
+            $refreshToken = (new Parser())->parse((string) $_POST['refreshToken']);
             
             if ($refreshToken->verify($signer, $refreshKey)) {
                 if ($refreshToken->validate($data)) {
@@ -81,7 +81,7 @@ if (isset($_COOKIE['accessToken'])) {
             } else {
                 echo "guest";
             }
-        } 
+        } */ 
     } else {
         echo "guest";
     }

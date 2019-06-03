@@ -4,7 +4,9 @@ import Input from './Input';
 import $ from 'jquery';
 import { Redirect } from 'react-router';
 import { withSnackbar } from 'notistack';
-import { deleteCookie } from './logic/CookieManager';
+import Button from '@material-ui/core/Button';
+import { validateEmail, validatePass, confirmPass } from './logic/Validate';
+import SubmitContainer from './styles/SubmitContainer';
 
 /*const useStyles = makeStyles(theme => ({
     profileContainer: {
@@ -16,72 +18,90 @@ import { deleteCookie } from './logic/CookieManager';
 function Profile(props)
 {
     //const classes = useStyles();
+    const [loggedIn, setLoggedIn] = useState(props.location.state.loggedIn);
     const [profileData, setProfileData] = useState([]);
-    const [loggedIn, setLoggedIn] = useState(false);
-
-    $.ajax({
-        // проверка авторизации
-        type: "POST",
-        url: "/back-end/api/AuthController.php",
-        data: "signedIn=q",
-        async: false,
-        success: function (response) {
-            console.log('Проверка авторизации в Profile');
-            console.log('Ответ сервера = ', response);
-            if (response === 'user') {
-                if (!loggedIn) {
-                    console.log('Устанавливаю loggedIn в true');
-                    setLoggedIn(true);
-                }
-                console.log('profileData = ', profileData);
-                //console.log('Ответ от сервера = ', response);
-                if (profileData.length === 0) {
-                    console.log('profileData.length == 0');
-                    $.ajax({
-                        // получение данных
-                        type: "POST",
-                        url: "/back-end/api/UserProfile.php",
-                        async: false,
-                        success: function (response) {
-                            console.log('Запрос на получение данных в Profile');
-                            if (response === 'guest') {
-                                console.log('Невалидный токен'); // только для dev версии, убрать перед билдом
-                                setLoggedIn(false);
-                                return;
-                            }
-                            if (response === '') console.log('Пустой ответ сервера');
-                            console.log('response = ', response);
-                            console.log('profileData = ', profileData);
-                            const parser = new DOMParser();
-                            const xml = parser.parseFromString(response, "text/xml");
-                            console.log('xml = ', xml);
-                            const xmlCollection = xml.childNodes[0].childNodes; // первый тег user, он содержит в себе все нужные теги
-                            console.log('xmlCollection', xmlCollection);
-                            const arrayFromXML = [];
-                            for (let i = 0; i < xmlCollection.length; i++) {
-                                arrayFromXML[xmlCollection[i].tagName] = xmlCollection[i].innerHTML;
-                            }
-                            arrayFromXML.length = xmlCollection.length;
-                            console.log('arrayFromXML', arrayFromXML);
-                            setProfileData(arrayFromXML);
-                        },
-                        error: function (xhr, status) {
-                            props.enqueueSnackbar('Ошибка авторизации. Пожалуйста, сообщите об этом администрации сайта.', { variant: 'error', autoHideDuration: 8000});
-                            props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
-                        },
-                    });
-                }
-            } else if (response === 'guest' && loggedIn) {
-                setLoggedIn(false);
-            }
-        },
-        error: function (xhr, status) {
-            props.enqueueSnackbar('Ошибка авторизации. Пожалуйста, сообщите об этом администрации сайта.', { variant: 'error', autoHideDuration: 8000});
-            props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
-        },
+    const [formData, setFormData] = useState({
+        password: '',
+        confirm: '',
+        validPassword: true,
+        passConfirmed: true,
     });
 
+    const handleChange = event => {
+        switch (event.target.name) {
+            case 'email':
+                setFormData({
+                    ...formData,
+                    email: event.target.value,
+                    validEmail: validateEmail(event.target.value),
+                });
+                break;
+            
+            case 'password':
+                setFormData({
+                    ...formData,
+                    password: event.target.value,
+                    validPassword: validatePass(event.target.value),
+                });
+                break;
+
+            case 'confirm':
+                setFormData({
+                    ...formData,
+                    confirm: event.target.value,
+                    passConfirmed: confirmPass(formData.password, event.target.value),
+                });
+                break;
+
+            default:
+                alert('Неизвестное поле! Атрибут поля name должен быть одним из: email, password, confirm')
+        }
+    };
+
+    if (loggedIn) {
+        console.log('profileData = ', profileData);
+        if (profileData.length === 0) {
+            console.log('profileData.length == 0');
+            $.ajax({
+                // получение данных
+                type: "POST",
+                url: "/back-end/api/UserProfile.php",
+                data: "accessToken="+localStorage.getItem('accessToken'),
+                async: false,
+                success: function (response) {
+                    console.log('Запрос на получение данных в Profile');
+                    if (response === 'guest') {
+                        console.log('Невалидный токен'); // только для dev версии, убрать перед билдом
+                        setLoggedIn(false);
+                        return;
+                    }
+                    if (response === '') console.log('Пустой ответ сервера');
+                    console.log('response = ', response);
+                    console.log('profileData = ', profileData);
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(response, "text/xml");
+                    console.log('xml = ', xml);
+                    const xmlCollection = xml.childNodes[0].childNodes; // первый тег user, он содержит в себе все нужные теги
+                    console.log('xmlCollection', xmlCollection);
+                    const arrayFromXML = [];
+                    for (let i = 0; i < xmlCollection.length; i++) {
+                        arrayFromXML[xmlCollection[i].tagName] = xmlCollection[i].innerHTML;
+                    }
+                    arrayFromXML.length = xmlCollection.length;
+                    console.log('arrayFromXML', arrayFromXML);
+                    setProfileData(arrayFromXML);
+                },
+                error: function (xhr, status) {
+                    props.enqueueSnackbar('Неудалось установить соединение с сервером. Проверьте интернет соединение и обновите страницу.', { variant: 'error', autoHideDuration: 8000});
+                    props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
+                    loggedIn(false);
+                },
+            });
+        }
+    }
+
     return (
+        console.log('Profile -> return: loggedIn = '+loggedIn),
         loggedIn ? <div>
             <Input
                 label="Имя"
@@ -124,14 +144,43 @@ function Profile(props)
                 value={profileData['city']}
                 error={false}
             />
-            <button onClick={() => {
-                console.log('Exit Button');
-                setLoggedIn(false);
-                deleteCookie('token');
-            }}>Выйти</button>
+            <Input
+                label="Новый пароль"
+                type='password'
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                error={formData.validPassword || formData.password === '' ? false : true}
+                helperMsg={formData.validPassword || formData.password === '' ? '' : 'Пароль должен быть не менее 8 символов'}
+            />
+            <Input
+                label="Повторите пароль"
+                type="password"
+                name="confirm"
+                value={formData.confirm}
+                error={formData.passConfirmed ? false : true}
+                helperMsg={formData.validPassword || formData.password === '' ? '' : 'Пароль должен быть не менее 8 символов'}
+            />
+            <SubmitContainer>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                        console.log('Exit Button');
+                        setLoggedIn(false);
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                    }}
+                >
+                    Выйти
+                </Button>
+            </SubmitContainer>
         </div>
         :
-        <Redirect to="/login" />
+        <Redirect to={{
+            pathname: "/login",
+            state: { loggedIn: loggedIn }
+        }} />
     );
 }
 

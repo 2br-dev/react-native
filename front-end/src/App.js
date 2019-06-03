@@ -5,45 +5,34 @@ import { SnackbarProvider } from 'notistack';
 import { Redirect, Switch, Route } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 import AuthRouter from './components/AuthRouter';
-import $ from 'jquery';
+import { AuthCheck } from './components/logic/AuthCheck';
 
 function App(props)
 {
     const [loggedIn, setLoggedIn] = useState(false);
 
-    $.ajax({
-        // проверка авторизации
-        type: "POST",
-        url: "/back-end/api/AuthController.php",
-        data: "signedIn=q",
-        async: false,
-        success: function (response) {
-            console.log('User status App = '+response);
-            if (response !== 'guest') {
-                if (!loggedIn) {
-                    setLoggedIn(true);
-                }
-            } else {
-                if (loggedIn) {
-                    setLoggedIn(true);
-                }
-            }
-        },
-        error: function (xhr, status) {
-            console.log('Ошибка отправки запроса на сервер. Проверьте ваше интернет соединение.');
-        },
-    });
+    if (AuthCheck()) {
+        console.log('App -> Пользователь авторизован, установил loggedIn в true.');
+        setLoggedIn(true);
+    }
 
     return (
+        console.log('App -> return: loggedIn = '+loggedIn),
         <BrowserRouter>
             <SnackbarProvider maxSnack={3}>
                 <Container maxWidth="sm">
                     <Switch>
                         <Route exact path="/" render={() => (
                             loggedIn ? (
-                                <Redirect to="/profile" />
+                                <Redirect to={{
+                                    pathname: "/profile",
+                                    state: { loggedIn: loggedIn }
+                                }} />
                             ) : (
-                                <Redirect to="/login" />
+                                <Redirect to={{
+                                    pathname: "/login",
+                                    state: { loggedIn: loggedIn }
+                                }} />
                             )
                         )} />
                         <Route path="/profile" component={Profile} />

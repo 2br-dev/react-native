@@ -38,59 +38,53 @@ RlE6WZtUlr2EDpmlfHzR9nFPCOFPn9L/Koil4MUReP+9MHDLDJR76ETLj8kvn8uz
 jspzaYYPhVZHj95//GUCQQCutoG3DgGPTsvnEIe6dxNoJ7ipDp1zHoRMQXVZfmbT
 Pmk+hqh64FR+k+azmI612UWh/kQDMI4NBcJZPnqxe2na");
 
+$data = new ValidationData(); // It will use the current time to validate (iat, nbf and exp)
+
 function createTokens($signer, $accessKey, $refreshKey, $userId)
 {
     $time = time();
     $accessToken = (new Builder())->issuedBy('http://react-native.local/') // Configures the issuer (iss claim)
                             ->issuedAt($time) // Configures the time that the token was issue (iat claim)
-                            ->expiresAt($time + 1) // Configures the expiration time of the token (exp claim)
+                            ->expiresAt($time + 60*60*24) // Configures the expiration time of the token (exp claim)
                             ->withClaim('uid', $userId) // Configures a new claim, called "uid"
                             ->getToken($signer, $accessKey); // Retrieves the generated token
     
-    setcookie('accessToken', $accessToken, 0, '/');
-    $log = 'accessToken = '.$accessToken;
+    //setcookie('accessToken', $accessToken, 0, '/');
+    $result = $accessToken;
     
     $refreshToken = (new Builder())->issuedBy('http://react-native.local/')
                             ->issuedAt($time)
-                            ->expiresAt($time + 10)
+                            ->expiresAt($time + 60*60*24*30*6)
                             ->getToken($signer, $refreshKey);
 
-    setcookie('refreshToken', $refreshToken, 0, '/');
-    $log .= ' ; refreshToken = '.$refreshToken;
+    //setcookie('refreshToken', $refreshToken, 0, '/');
+    $result .= ' && '.$refreshToken;
 
-    echo $log;
+    return $result;
 }
 
 if (isset($_POST['signedIn'])) {
-    if (isset($_COOKIE['accessToken'])) {
-        $accessToken = (new Parser())->parse((string) $_COOKIE['accessToken']);
-        //echo "tokenVerify = ".$token->verify($signer, $accessKey);
+    if (isset($_POST['accessToken'])) {
+        $accessToken = (new Parser())->parse((string) $_POST['accessToken']);
         if ($accessToken->verify($signer, $accessKey)) {
-            // проверить время жизни токена, если истекло запросить рефреш
-
-            $data = new ValidationData(); // It will use the current time to validate (iat, nbf and exp)
-            
             // проверка, истекло ли время жизни accessToken
-            if (!$accessToken->validate($data)) {
-                // если истекло, проверка refreshToken
-                if (isset($_COOKIE['refreshToken'])) {
-                    $refreshToken = (new Parser())->parse((string) $_COOKIE['refreshToken']);
-                    if ($refreshToken->verify($signer, $refreshKey)) {
-                        if ($refreshToken->validate($data)) {
-                            // если refreshToken подписан и не истекло время жизни, создать новую пару токенов
-                            createTokens($signer, $accessKey, $refreshKey, $accessToken->getClaim('uid'));
-                            echo "user";
-                        } else {
-                            echo "guest";
-                        }
-                    } else {
-                        echo "guest";
-                    }
-                } else {
-                    echo "guest";
-                }
+            if ($accessToken->validate($data)) {
+                echo "token is valid";
             } else {
-                echo "user";
+                // если истекло, запрос refreshToken
+                echo "token expired";
+            }
+        } else {
+            echo "guest";
+        }
+    } else if (isset($_POST['refreshToken'])) {
+        $refreshToken = (new Parser())->parse((string) $_POST['refreshToken']);
+        if ($refreshToken->verify($signer, $refreshKey)) {
+            if ($refreshToken->validate($data)) {
+                // если refreshToken подписан и не истекло время жизни, создать новую пару токенов
+                echo createTokens($signer, $accessKey, $refreshKey, $accessToken->getClaim('uid'));
+            } else {
+                echo "guest";
             }
         } else {
             echo "guest";
@@ -102,7 +96,7 @@ if (isset($_POST['signedIn'])) {
     $login = filter_var(trim($_POST["login"]), FILTER_SANITIZE_STRING);
     $password = filter_var(trim($_POST["password"]), FILTER_SANITIZE_STRING);
 
-    $loginType = preg_match("/@/", $login) ? 'email' : 'username';
+    $loginType = preg_match("/@/", $login) ? 'email' : 'login';
 
     $dbConnect = new DbConnect('db_mdd_users');
 
@@ -111,7 +105,7 @@ if (isset($_POST['signedIn'])) {
     if ($userRow->num_rows > 0) {
         $userData = $userRow->fetch_assoc();
         if (password_verify($password, $userData['password'])) {
-            createTokens($signer, $accessKey, $refreshKey, $userData['id']);
+            echo createTokens($signer, $accessKey, $refreshKey, $userData['id']);
         } else {
             echo "denied";
         }

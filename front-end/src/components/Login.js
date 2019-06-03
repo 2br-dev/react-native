@@ -6,8 +6,7 @@ import { Redirect } from 'react-router';
 
 function Login(props)
 {
-    const [loggedIn, setLoggedIn] = useState(false);
-
+    const [loggedIn, setLoggedIn] = useState(props.loggedIn);
     const handleClick = (login, password) => {
         console.log('Вошёл в Login->handleClick');
         $.ajax({
@@ -21,20 +20,23 @@ function Login(props)
                     props.enqueueSnackbar(response, { variant: 'error'});
                 } else {
                     // пользователь авторизован
-                    setLoggedIn(true);
                     console.log('Пользователь прошёл авторизацию');
                     console.log('Установил loggedIn в true');
                     console.log('Server Response = ', response);
+                    const tokenArr = response.split(" && ");
+                    localStorage.setItem('accessToken', tokenArr[0]);
+                    localStorage.setItem('refreshToken', tokenArr[1]);
+                    setLoggedIn(true);
                 }
             },
             error: function (xhr, status) {
-                props.enqueueSnackbar('Ошибка авторизации. Пожалуйста, сообщите об этом администрации сайта.', { variant: 'error', autoHideDuration: 8000});
-                props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
+                props.enqueueSnackbar('Неудалось установить соединение с сервером. Проверьте интернет соединение и обновите страницу.', { variant: 'error', autoHideDuration: 8000});
+                // props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
             }
         });
     };
 
-    $.ajax({
+    /* $.ajax({
         // проверка авторизации
         type: "POST",
         url: "/back-end/api/AuthController.php",
@@ -58,10 +60,14 @@ function Login(props)
             props.enqueueSnackbar('Ошибка авторизации. Пожалуйста, сообщите об этом администрации сайта.', { variant: 'error', autoHideDuration: 8000});
             props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
         },
-    });
+    }); */
 
     return(
-        loggedIn ? <Redirect to="/profile" />
+        console.log('Login -> return: loggedIn = '+loggedIn),
+        loggedIn ? <Redirect to={{
+            pathname: "/profile",
+            state: {loggedIn: loggedIn},
+        }} />
         :
         <LoginForm onClick={(login, pass) => {
             handleClick(login, pass);
