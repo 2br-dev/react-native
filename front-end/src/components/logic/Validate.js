@@ -10,7 +10,7 @@ function validateEmail(email)
         let result = 0;
         $.ajax({
             type: 'POST',
-            url: '/back-end/api/RegistrationController.php',
+            url: 'http://react-native.local/back-end/api/RegistrationController.php',
             data: 'check=1&email='+email,
             async: false,
             success: function(response) {

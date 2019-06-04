@@ -4,6 +4,7 @@ require_once "./db/DbConnect.php";
 
 class User
 {
+    private $id = '';
     private $email;
     private $password;
     private $name;
@@ -13,6 +14,7 @@ class User
     private $created;
     private $updated;
     private $login = '';
+    private $table = 'db_mdd_users';
 
     function __construct(
       string $email = '',
@@ -31,21 +33,27 @@ class User
         $this->city = $city;
         $this->created = date('Y-m-d H:i:s');
         $this->updated = $this->created;
-        $dbConnect = new DbConnect('db_mdd_users');
-        $existedCol = $dbConnect->query("DESCRIBE db_mdd_users");
+        $dbConnect = new DbConnect();
+        $table = $this->table;
+        $existedCol = $dbConnect->query("DESCRIBE $table");
         $columns = [];
         for ($i = 0; $i < $existedCol->num_rows; $i++) {
             $row = $existedCol->fetch_assoc();
             $columns[] = $row['Field'];
         }
         foreach ($this as $key => $value) {
-            if (!in_array($key, $columns)) {
-                $dbConnect->query("ALTER TABLE db_mdd_users ADD $key VARCHAR(255)");
+            if ($key != 'table' && !in_array($key, $columns)) {
+                $dbConnect->query("ALTER TABLE $table ADD $key VARCHAR(255)");
             }
         }
     }
 
     // Сеттеры  -----------------------------------------
+
+    public function setId(int $id)
+    {
+        $this->id = $id;
+    }
 
     public function setEmail(string $email)
     {
@@ -91,6 +99,11 @@ class User
 
     // Геттеры  -----------------------------------------
 
+    public function getId()
+    {
+        return $this->id;
+    }
+
     public function getEmail()
     {
         return $this->email;
@@ -135,7 +148,7 @@ class User
 
     public function createUser()
     {
-        $dbConnect = new DbConnect('db_mdd_users');
+        $dbConnect = new DbConnect();
 
         if ($this->exists()) {
             return "Дубликат";
@@ -150,49 +163,67 @@ class User
         $fieldNames = trim($fieldNames, ',');
         $values = trim($values, ',');
         
-        $dbConnect->save($fieldNames, $values);
+        $dbConnect->query("INSERT INTO {$this->table} ($fieldNames) VALUES ($values)");
 
         $dbConnect->close();
 
         return "Успешная регистрация";
     }
 
-    public function loadUserData(int $id)
+    public function loadUserData()
     {
-        $dbConnect = new DbConnect('db_mdd_users');
+        $dbConnect = new DbConnect();
 
-        $column = "id='$id'";
-        $userData = $dbConnect->load($column)->fetch_assoc();
+        if ($this->id != '') {
+            $column = "id='{$this->id}'";
+        } else if ($this->email != '') {
+            $column = "email='{$this->email}'";
+        } else if ($this->login != '') {
+            $column = "login='{$this->login}'";
+        } else {
+            return false;
+        }
+        
+        $userRow = $dbConnect->query("SELECT * FROM {$this->table} WHERE $column");
+
+        if ($userRow->num_rows == 0) {
+            return false;
+        }
+
+        $userData = $userRow->fetch_assoc();
 
         foreach ($userData as $key => $value) {
             $this->$key = $value;
         }
 
         $dbConnect->close();
+
+        return true;
     }
 
     public function updateUser(array $updating)
     // updating - ассоциативный массив, где ключ - поле в БД
     {
-        $dbConnect = new DbConnect('db_mdd_users');
+        $dbConnect = new DbConnect();
 
         $values = '';
         foreach ($updating as $key => $value) {
-            $values .= "$key='$value',";
+            if ($key != 'id' && property_exists($this, $key)) {
+                $values .= "$key='$value',";
+            }
         }
         $values = trim($values, ',');
 
-        $dbConnect->update($values, "email='".$this->email."'");
+        $dbConnect->query("UPDATE {$this->table} SET $values WHERE email='{$this->email}'");
 
         $dbConnect->close();
     }
 
     public function deleteUser()
     {
-        $dbConnect = new DbConnect('db_mdd_users');
+        $dbConnect = new DbConnect();
 
-        $condition = "email='".$this->email."'";
-        $dbConnect->delete($condition);
+        $dbConnect->query("DELETE FROM {$this->table} WHERE email='{$this->email}'");
         
         $this->clear();
 
@@ -221,8 +252,8 @@ class User
 
     public function exists()
     {
-        $dbConnect = new DbConnect('db_mdd_users');
-        $result = $dbConnect->load("email='{$this->email}'");
+        $dbConnect = new DbConnect();
+        $result = $dbConnect->query("SELECT * FROM {$this->table} WHERE email='{$this->email}'");
         if ($result->num_rows == 0) {
             return false;
         }

@@ -5,7 +5,7 @@ function Registration(email, password)
     let result = '';
     $.ajax({
         type: "POST",
-        url: "/back-end/api/RegistrationController.php",
+        url: "http://react-native.local/back-end/api/RegistrationController.php",
         data: "email="+email+"&password="+password,
         async: false,
         success: function (responseMsg) {
@@ -13,7 +13,6 @@ function Registration(email, password)
                 result = 'дубль';
             } else {
                 result = responseMsg;
-                console.log('Ответ сервера на запрос регистрации = '+responseMsg);
             }
         },
         error: function (xhr, status) {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Form from './logic/Form';
-import Menu from './Menu';
+import Form from './Form';
+import Menu from '../Menu';
 import { Redirect } from 'react-router';
 import { withSnackbar } from 'notistack';
 
@@ -13,10 +13,9 @@ function AuthRouter(props)
     }
 
     return (
-        console.log('AuthRouter -> return: loggedIn = '+props.location.state.loggedIn),
         props.loggedIn ? <Redirect to={{
             pathname: "/profile",
-            state: { loggedIn: props.location.state.loggedIn }
+            state: {loggedIn: props.location.state.loggedIn}
         }}
         />
         :
@@ -26,7 +25,10 @@ function AuthRouter(props)
                 signUp={() => handleClick('signUp')}
                 active={page}
             />
-            <Form type={page} loggedIn={ props.location.state.loggedIn } />
+            <Form
+                type={page}
+                loggedIn={ props.location.state.loggedIn }
+            />
         </div>
     );
 }

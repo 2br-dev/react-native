@@ -9,9 +9,6 @@ $input = file_get_contents('php://input');
 
 $value = explode("=", $input);
 
-//var_dump($value);
-
-echo "Пароль до фильтрации = ".$value[3]." | ";
 $value[3] = filter_var(trim($value[3]), FILTER_SANITIZE_STRING);
 
 $accessToken = (new Parser())->parse((string) $value[1]);
@@ -19,14 +16,16 @@ $accessToken = (new Parser())->parse((string) $value[1]);
 $userId = $accessToken->getClaim('uid');
 
 $user = new User();
+$user->setId($userId);
 
-$user->loadUserData($userId);
+$user->loadUserData();
 
 if ($value[2] == 'confirm') {
-    echo "Меняю пароль на ".$value[3]." | ";
+    // обновляется пароль
     $cryptedPass = password_hash($value[3], PASSWORD_BCRYPT);
     $user->updateUser(['password' => $cryptedPass]);
 } else {
+    // обновляется другое поле
     $user->updateUser([$value[2] => $value[3]]);
 }
 

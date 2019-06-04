@@ -40,7 +40,8 @@ Pmk+hqh64FR+k+azmI612UWh/kQDMI4NBcJZPnqxe2na");
 function returnXmlData($userId)
 {
     $user = new User();
-    $user->loadUserData($userId);
+    $user->setId($userId);
+    $user->loadUserData();
 
     $xml = new SimpleXMLElement("<?xml version='1.0' standalone='yes' ?><user></user>");
 
@@ -58,7 +59,6 @@ function returnXmlData($userId)
 
 if (isset($_POST['accessToken'])) {
     $accessToken = (new Parser())->parse((string) $_POST['accessToken']);
-    //echo "tokenVerify = ".$token->verify($signer, $accessKey);
     if ($accessToken->verify($signer, $accessKey)) {
         $data = new ValidationData(); // It will use the current time to validate (iat, nbf and exp)
 
@@ -66,22 +66,22 @@ if (isset($_POST['accessToken'])) {
             // время жизни не истекло
             returnXmlData($accessToken->getClaim('uid'));
 
-        }/*  else if (isset($_POST['refreshToken'])) {
-            $refreshToken = (new Parser())->parse((string) $_POST['refreshToken']);
-            
-            if ($refreshToken->verify($signer, $refreshKey)) {
-                if ($refreshToken->validate($data)) {
-                    // если refreshToken подписан и не истекло время жизни, создать новую пару токенов
-                    createTokens($signer, $accessKey, $refreshKey, $accessToken->getClaim('uid'));
-                    // и вернуть данные
-                    returnXmlData($accessToken->getClaim('uid'));
-                } else {
-                    echo "guest";
-                }
-            } else {
-                echo "guest";
-            }
-        } */ 
+        } else {
+            echo "token expired";
+        } 
+    } else {
+        echo "guest";
+    }
+} else if (isset($_POST['refreshToken'])) {
+    $refreshToken = (new Parser())->parse((string) $_POST['refreshToken']);
+    
+    if ($refreshToken->verify($signer, $refreshKey)) {
+        if ($refreshToken->validate($data)) {
+            // если refreshToken подписан и не истекло время жизни, создать новую пару токенов
+            echo createTokens($signer, $accessKey, $refreshKey, $accessToken->getClaim('uid'));
+        } else {
+            echo "guest";
+        }
     } else {
         echo "guest";
     }

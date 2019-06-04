@@ -1,6 +1,6 @@
 <?php
 
-require_once "db/DbConnect.php";
+require_once "user/User.php";
 require_once "./../vendor/autoload.php";
 
 use Lcobucci\JWT\Builder;
@@ -49,7 +49,6 @@ function createTokens($signer, $accessKey, $refreshKey, $userId)
                             ->withClaim('uid', $userId) // Configures a new claim, called "uid"
                             ->getToken($signer, $accessKey); // Retrieves the generated token
     
-    //setcookie('accessToken', $accessToken, 0, '/');
     $result = $accessToken;
     
     $refreshToken = (new Builder())->issuedBy('http://react-native.local/')
@@ -96,16 +95,17 @@ if (isset($_POST['signedIn'])) {
     $login = filter_var(trim($_POST["login"]), FILTER_SANITIZE_STRING);
     $password = filter_var(trim($_POST["password"]), FILTER_SANITIZE_STRING);
 
-    $loginType = preg_match("/@/", $login) ? 'email' : 'login';
+    $loginType = preg_match("/@/", $login) ? 'Email' : 'Login';
 
-    $dbConnect = new DbConnect('db_mdd_users');
+    $user = new User();
 
-    $userRow = $dbConnect->load("$loginType='$login'");
+    $set = "set$loginType";
 
-    if ($userRow->num_rows > 0) {
-        $userData = $userRow->fetch_assoc();
-        if (password_verify($password, $userData['password'])) {
-            echo createTokens($signer, $accessKey, $refreshKey, $userData['id']);
+    $user->$set($login); 
+
+    if ($user->loadUserData()) {
+        if (password_verify($password, $user->getPassword())) {
+            echo createTokens($signer, $accessKey, $refreshKey, $user->getId());
         } else {
             echo "denied";
         }

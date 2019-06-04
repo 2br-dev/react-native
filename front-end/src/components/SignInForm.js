@@ -1,23 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Button from '@material-ui/core/Button';
-import Link from '@material-ui/core/Link';
+import { Link } from 'react-router-dom';
 import Form from './styles/StyledForm';
 import SubmitContainer from './styles/SubmitContainer';
 import { withSnackbar } from 'notistack';
 import Input from './Input';
 
 function SignInForm(props)
-{
-    const [formData, setFormData] = useState({
-        login: '',
-        password: '',
-        showPassword: false,
-    });
-
-     const handleChange = event => {
-        setFormData({ ...formData, [event.target.name]: event.target.value});
-    };
-    
+{   
     return (
         <Form>
             <Input
@@ -25,28 +15,31 @@ function SignInForm(props)
                 type="email"
                 name="login"
                 autoComplete="email"
-                value={formData.login}
-                onChange={handleChange}
+                value={props.data.login}
+                onChange={props.onChange}
             />
             <Input
                 label="Пароль"
                 type='password'
                 name="password"
                 autoComplete="current-password"
-                value={formData.password}
-                onChange={handleChange}
+                value={props.data.password}
+                onChange={props.onChange}
             />
             <SubmitContainer>
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={() => {
-                        props.onClick(formData.login, formData.password);
+                        props.onClick(props.data.login, props.data.password);
                     }}
                 >
                     Войти
                 </Button>
-                <Link component="button" to="/forgot">Забыли пароль?</Link>
+                <Link to={{
+                    pathname: "/forgot",
+                    state: { loggedIn: props.loggedIn }
+                }}>Забыли пароль?</Link>
             </SubmitContainer>
         </Form>
     );

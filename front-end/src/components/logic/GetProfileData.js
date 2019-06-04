@@ -2,38 +2,53 @@ import $ from 'jquery';
 
 function getProfileData()
 {
-    let result = false;
+    let result = null;
     $.ajax({
         // получение данных
         type: "POST",
-        url: "/back-end/api/UserProfile.php",
+        url: "http://react-native.local/back-end/api/UserProfile.php",
         data: "accessToken="+localStorage.getItem('accessToken'),
         async: false,
         success: function (response) {
-            console.log('Запрос на получение данных в GetProfileData');
+            let tokenUpdated = 0;
             if (response === 'guest') {
-                console.log('Невалидный токен'); // только для dev версии, убрать перед билдом
+                return;
+            } else if (response === 'token expired') {
+                $.ajax({
+                    // обновление токенов
+                    type: "POST",
+                    url: "http://react-native.local/back-end/api/UserProfile.php",
+                    data: "refreshToken="+localStorage.getItem('refreshToken'),
+                    async: false,
+                    success: function(response) {
+                        if (response !== 'guest') {
+                            const tokenArr = response.split(" && ");
+                            localStorage.setItem('accessToken', tokenArr[0]);
+                            localStorage.setItem('refreshToken', tokenArr[1]);
+                            tokenUpdated = 1;
+                        } else {
+                            tokenUpdated = -1;
+                        }
+                    }
+                });
+            } else {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(response, "text/xml");
+                const xmlCollection = xml.childNodes[0].childNodes; // первый тег user, он содержит в себе все нужные теги
+                const arrayFromXML = {};
+                for (let i = 0; i < xmlCollection.length; i++) {
+                    arrayFromXML[xmlCollection[i].tagName] = xmlCollection[i].innerHTML;
+                }
+                arrayFromXML.length = xmlCollection.length; // у сформированного массива arrayFromXML length == 0, поэтому присваивается length от xmlCollection
+                result = arrayFromXML;
+            }
+
+            if (tokenUpdated === 1) {
+                result = getProfileData();
+            } else if (tokenUpdated === -1) {
                 return;
             }
-            if (response === '') console.log('Пустой ответ сервера');
-            console.log('response = ', response);
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(response, "text/xml");
-            console.log('xml = ', xml);
-            const xmlCollection = xml.childNodes[0].childNodes; // первый тег user, он содержит в себе все нужные теги
-            console.log('xmlCollection', xmlCollection);
-            const arrayFromXML = {};
-            for (let i = 0; i < xmlCollection.length; i++) {
-                arrayFromXML[xmlCollection[i].tagName] = xmlCollection[i].innerHTML;
-            }
-            arrayFromXML.length = xmlCollection.length; // у сформированного массива arrayFromXML length == 0, поэтому присваивается length от xmlCollection
-            console.log('arrayFromXML', arrayFromXML);
-            result = arrayFromXML;
-        },
-        error: function (xhr, status) {
-            console.log('Неудалось установить соединение с сервером. Проверьте интернет соединение и обновите страницу.');
-            console.log('Статус: '+status);
-        },
+        }
     });
 
     return result;
