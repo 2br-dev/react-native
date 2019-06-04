@@ -6,6 +6,7 @@ import { Redirect } from 'react-router';
 import { withSnackbar } from 'notistack';
 import Button from '@material-ui/core/Button';
 import { validateEmail, validatePass, confirmPass } from './logic/Validate';
+import { getProfileData } from './logic/GetProfileData';
 import SubmitContainer from './styles/SubmitContainer';
 
 /*const useStyles = makeStyles(theme => ({
@@ -131,43 +132,14 @@ function Profile(props)
         for (let key in profileData) {
             keyCount++;
         }
+        // если объект profileData пуст, значит данные запрашиваются первый раз
+        // проверка необходима для предотвращения повторных запросов, на уже полученные данные
         if (keyCount === 0) {
             console.log('profileData.length == 0');
-            $.ajax({
-                // получение данных
-                type: "POST",
-                url: "/back-end/api/UserProfile.php",
-                data: "accessToken="+localStorage.getItem('accessToken'),
-                async: false,
-                success: function (response) {
-                    console.log('Запрос на получение данных в Profile');
-                    if (response === 'guest') {
-                        console.log('Невалидный токен'); // только для dev версии, убрать перед билдом
-                        setLoggedIn(false);
-                        return;
-                    }
-                    if (response === '') console.log('Пустой ответ сервера');
-                    console.log('response = ', response);
-                    console.log('profileData = ', profileData);
-                    const parser = new DOMParser();
-                    const xml = parser.parseFromString(response, "text/xml");
-                    console.log('xml = ', xml);
-                    const xmlCollection = xml.childNodes[0].childNodes; // первый тег user, он содержит в себе все нужные теги
-                    console.log('xmlCollection', xmlCollection);
-                    const arrayFromXML = {};
-                    for (let i = 0; i < xmlCollection.length; i++) {
-                        arrayFromXML[xmlCollection[i].tagName] = xmlCollection[i].innerHTML;
-                    }
-                    arrayFromXML.length = xmlCollection.length;
-                    console.log('arrayFromXML', arrayFromXML);
-                    setProfileData(arrayFromXML);
-                },
-                error: function (xhr, status) {
-                    props.enqueueSnackbar('Неудалось установить соединение с сервером. Проверьте интернет соединение и обновите страницу.', { variant: 'error', autoHideDuration: 8000});
-                    props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
-                    loggedIn(false);
-                },
-            });
+            const data = getProfileData();
+            if (data) {
+                setProfileData(data);
+            }
         }
     }
 

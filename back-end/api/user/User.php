@@ -137,12 +137,7 @@ class User
     {
         $dbConnect = new DbConnect('db_mdd_users');
 
-        if (!$storedEmail = $dbConnect->query("SELECT * FROM db_mdd_users WHERE email='{$this->email}'")) {
-            echo "Ошибка запроса createUser к БД. Пожалуйста, сообщите об этой ошибке администрации сайта.";
-            exit();
-        }
-
-        if ($storedEmail->num_rows > 0) {
+        if ($this->exists()) {
             return "Дубликат";
         }
 
@@ -166,7 +161,7 @@ class User
     {
         $dbConnect = new DbConnect('db_mdd_users');
 
-        $column = "id='".$id."'";
+        $column = "id='$id'";
         $userData = $dbConnect->load($column)->fetch_assoc();
 
         foreach ($userData as $key => $value) {
@@ -222,5 +217,15 @@ class User
         $xmlString = $xml->asXML();
 
         return $xmlString;
+    }
+
+    public function exists()
+    {
+        $dbConnect = new DbConnect('db_mdd_users');
+        $result = $dbConnect->load("email='{$this->email}'");
+        if ($result->num_rows == 0) {
+            return false;
+        }
+        return true;
     }
 }

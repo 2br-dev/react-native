@@ -1,30 +1,54 @@
 import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
-import $ from 'jquery';
 import { withSnackbar } from 'notistack';
 import Form from './styles/StyledForm';
 import SubmitContainer from './styles/SubmitContainer';
 import { validateEmail, validatePass, confirmPass } from './logic/Validate';
+import { Registration } from './logic/Registration';
 import Input from './Input';
 
-function Registration(props)
+function SignUpForm(props)
 {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         confirm: '',
         validEmail: true,
+        emailErrorMsg: '',
         validPassword: true,
         passConfirmed: false,
     });
 
     const handleChange = event => {
+        let isValid = formData.validEmail;
+        let errorMsg = '';
+        let validResponse = null;
         switch (event.target.name) {
             case 'email':
+                validResponse = validateEmail(event.target.value);
+                switch (validResponse) {
+                    case 1:
+                        isValid = true;
+                        break;
+                    case 0:
+                        isValid = false;
+                        errorMsg = 'Введите корректный Email';
+                        break;
+                    case -1:
+                        isValid = false;
+                        errorMsg = 'Пользователь с таким Email уже зарегистрирован';
+                        break;
+
+                    default:
+                        isValid = false;
+                        errorMsg = validResponse;
+                        break;
+                }
                 setFormData({
                     ...formData,
                     email: event.target.value,
-                    validEmail: validateEmail(event.target.value),
+                    validEmail: isValid,
+                    emailErrorMsg: errorMsg,
                 });
                 break;
             
@@ -52,33 +76,30 @@ function Registration(props)
     function handleClick() {
         const email = formData.email;
         const password = formData.password;
-      
-        $.ajax({
-            // регистрация пользователя
-            type: "POST",
-            url: "/back-end/api/RegistrationController.php",
-            data: "email="+email+"&password="+password,
-            success: function (responseMsg) {
-                if (responseMsg === 'Дубликат') {
-                    props.enqueueSnackbar('Пользователь с таким Email уже зарегистрирован', { variant: 'error' });
-                } else {
-                    setFormData({
-                        email: '',
-                        password: '',
-                        confirm: '',
-                        showPassword: false,
-                        validEmail: true,
-                        validPassword: true,
-                        passConfirmed: false,
-                    });
-                    props.enqueueSnackbar(responseMsg, { variant: 'success' });
-                }
-            },
-            error: function (xhr, status) {
-                props.enqueueSnackbar('Во время регистрации возникла ошибка. Пожалуйста, сообщите об этом администрации сайта.', { variant: 'error', autoHideDuration: 8000});
-                props.enqueueSnackbar('Статус: '+status, { variant: 'error', autoHideDuration: 4000});
-            }
-        });
+
+        const regResponse = Registration(email, password);
+        switch (regResponse) {
+            case 'error':
+                props.enqueueSnackbar('Ошибка отправки запроса на сервер. Проверьте ваше интернет соединение.');
+                break;
+        
+            case 'дубль':
+                props.enqueueSnackbar('Пользователь с таким Email уже зарегистрирован', { variant: 'error' });
+                break;
+
+            default:
+                setFormData({
+                    email: '',
+                    password: '',
+                    confirm: '',
+                    showPassword: false,
+                    validEmail: true,
+                    validPassword: true,
+                    passConfirmed: false,
+                });
+                props.enqueueSnackbar(regResponse, { variant: 'success' });
+                break;
+        }
     }
 
     return (
@@ -91,7 +112,7 @@ function Registration(props)
                 value={formData.email}
                 onChange={handleChange}
                 error={formData.validEmail ? false : true}
-                helperMsg={formData.validEmail ? '' : 'Введите корректный Email'}
+                helperMsg={formData.emailErrorMsg}
             />
                  
             <Input
@@ -129,4 +150,4 @@ function Registration(props)
     );
 }
 
-export default withSnackbar(Registration);
+export default withSnackbar(SignUpForm);

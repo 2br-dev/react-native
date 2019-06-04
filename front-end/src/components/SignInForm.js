@@ -6,7 +6,7 @@ import SubmitContainer from './styles/SubmitContainer';
 import { withSnackbar } from 'notistack';
 import Input from './Input';
 
-function LoginForm(props)
+function SignInForm(props)
 {
     const [formData, setFormData] = useState({
         login: '',
@@ -14,8 +14,8 @@ function LoginForm(props)
         showPassword: false,
     });
 
-     const handleChange = prop => event => {
-        setFormData({ ...formData, [prop]: event.target.value});
+     const handleChange = event => {
+        setFormData({ ...formData, [event.target.name]: event.target.value});
     };
     
     return (
@@ -23,10 +23,10 @@ function LoginForm(props)
             <Input
                 label="Email или логин"
                 type="email"
-                name="email"
+                name="login"
                 autoComplete="email"
                 value={formData.login}
-                onChange={handleChange('login')}
+                onChange={handleChange}
             />
             <Input
                 label="Пароль"
@@ -34,7 +34,7 @@ function LoginForm(props)
                 name="password"
                 autoComplete="current-password"
                 value={formData.password}
-                onChange={handleChange('password')}
+                onChange={handleChange}
             />
             <SubmitContainer>
                 <Button
@@ -52,4 +52,4 @@ function LoginForm(props)
     );
 }
 
-export default withSnackbar(LoginForm);
+export default withSnackbar(SignInForm);

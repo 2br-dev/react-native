@@ -1,6 +1,6 @@
 import React from 'react';
-import Login from '../Login';
-import Registration from '../Registration';
+import Login from './Login';
+import SignUpForm from '../SignUpForm';
 
 function Form(props)
 {
@@ -12,7 +12,7 @@ function Form(props)
     } else if (props.type === 'signUp') {
         return (
             console.log('Form -> return: loggedIn = '+props.loggedIn),
-            <Registration />
+            <SignUpForm />
         );
     } else {
         return (<h1>404 Page not found</h1>);
