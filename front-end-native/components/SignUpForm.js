@@ -5,15 +5,50 @@ import React from 'react';
 // import Form from './styles/StyledForm';
 // import SubmitContainer from './styles/SubmitContainer';
 // import Input from './Input';
-import { View, Text } from 'react-native';
+import { Alert } from 'react-native';
+import { Form, Item, Label, Input, Button, Text } from 'native-base';
 
 function SignUpForm(props)
 {
-    let {data, onChange, onClick} = props;
+    let {data, onChangeEmail, onChangeSignUpPassword, onChangeConfirm, onClick} = props;
     return (
-        <View>
-            <Text>Reg</Text>
-        </View>
+        <Form style={{
+            marginHorizontal: 10
+        }}>
+            <Item floatingLabel>
+                <Label>Email</Label>
+                <Input
+                    name='email'
+                    keyboardType='email-address'
+                    onChangeText={onChangeEmail}
+                />
+            </Item>
+            <Item floatingLabel last>
+                <Label>Пароль</Label>
+                <Input
+                    secureTextEntry
+                    name='password'
+                    onChangeText={onChangeSignUpPassword}
+                />
+            </Item>
+            <Item floatingLabel last>
+                <Label>Повторите пароль</Label>
+                <Input
+                    secureTextEntry
+                    name='confirm'
+                    onChangeText={onChangeConfirm}
+                />
+            </Item>
+            <Button
+                block
+                style={{
+                    marginTop: 64
+                }}
+                onPress={onClick}
+            >
+                <Text>Регистрация</Text>
+            </Button>
+        </Form>
     );
 }
 

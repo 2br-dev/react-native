@@ -6,6 +6,7 @@ class User
 {
     private $id = '';
     private $email;
+    private $login = '';
     private $password;
     private $name;
     private $phone;
@@ -13,7 +14,6 @@ class User
     private $city;
     private $created;
     private $updated;
-    private $login = '';
     private $table = 'db_mdd_users';
 
     function __construct(

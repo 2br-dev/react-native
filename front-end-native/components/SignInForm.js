@@ -20,20 +20,23 @@ variant="contained"
 */
 
 function SignInForm(props)
-{   
+{
+    let {data, onChange, onClick} = props;
     return (
         <Form style={{
             marginHorizontal: 10
         }}>
             <Item floatingLabel>
-                <Label>Username</Label>
+                <Label>Email или логин</Label>
                 <Input />
             </Item>
             <Item floatingLabel last>
-                <Label>Password</Label>
+                <Label>Пароль</Label>
                 <Input secureTextEntry />
             </Item>
-            <Button block>
+            <Button block style={{
+                marginTop: 64
+            }}>
                 <Text>Войти</Text>
             </Button>
         </Form>
