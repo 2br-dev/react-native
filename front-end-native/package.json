@@ -15,7 +15,7 @@
     "braces": "^3.0.2",
     "expo": "^33.0.0",
     "expo-font": "^5.0.1",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "native-base": "^2.12.1",
     "react": "16.8.3",
     "react-dom": "^16.8.6",
