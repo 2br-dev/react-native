@@ -13,7 +13,7 @@
     "@types/markerclustererplus": "^2.1.33",
     "@types/react": "^16.8.19",
     "braces": "^3.0.2",
-    "expo": "^33.0.0",
+    "expo": "^46.0.16",
     "expo-font": "^5.0.1",
     "jquery": "^3.4.1",
     "native-base": "^2.12.1",
